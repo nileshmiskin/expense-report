@@ -4,139 +4,47 @@ import java.util.Date;
 import java.util.List;
 
 enum ExpenseType {
-    DINNER("Dinner", 5000, true), BREAKFAST("Breakfast", 1000, true), CAR_RENTAL("Car Rental");
-
-    private String displayName;
-    private int limit;
-    private boolean isMeal;
-
-    ExpenseType(String displayName){
-        this.displayName = displayName;
-        this.limit = Integer.MAX_VALUE;
-        this.isMeal = false;
-    }
-
-    ExpenseType(String displayName, int limit, boolean isMeal){
-        this.displayName = displayName;
-        this.limit = limit;
-        this.isMeal = isMeal;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public boolean isMeal() {
-        return isMeal;
-    }
+    DINNER, BREAKFAST, CAR_RENTAL
 }
 
 class Expense {
-    private ExpenseType type;
-    private int amount;
-
-    public Expense(ExpenseType expenseType, int amount) {
-        this.type = expenseType;
-        this.amount = amount;
-    }
-
-    public ExpenseType getType() {
-        return type;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public boolean getOverLimitMarker() {
-        return this.getAmount() > this.getType().getLimit();
-    }
-
-    public String getExpenseName() {
-       return this.getType().getDisplayName();
-    }
-
-    public String getExpenseDetail(){
-        String marker = getOverLimitMarker() ? "X" : "";
-        return this.getExpenseName() + "\t" + this.getAmount() + "\t" + marker + "\n";
-    }
-
-    public boolean isMeal(){
-        return this.getType().isMeal();
-    }
+    ExpenseType type;
+    int amount;
 }
 
 public class ExpenseReport {
-
-    public void printReport(List<Expense> expenses){
-        String report = generateReport(expenses, new Date());
-        System.out.println(report);
-    }
-
-    public String generateReport(List<Expense> expenses, Date date) {
-
-
-        String report  = "";
-
-        //HEADER
-        String header = getHeader(date);
-
-        String body = getBody(expenses);
-
-        int mealExpenses = getMealExpenses(expenses);
-        int total = getTotal(expenses);
-        //FOOTER
-        String footer = getFooter(mealExpenses, total);
-
-        // Report
-        report = header + body + footer;
-
-        return report;
-    }
-
-    private static String getBody(List<Expense> expenses) {
-        String body = "";
-        for (Expense expense : expenses) {
-
-            //BODY
-            body = body + expense.getExpenseDetail();
-
-        }
-        return body;
-    }
-
-    private static int getTotal(List<Expense> expenses) {
+    public void printReport(List<Expense> expenses) {
         int total = 0;
-        for (Expense expense: expenses){
-            total += expense.getAmount();
-        }
-        return total;
-
-    }
-
-
-    private static int getMealExpenses(List<Expense> expenses) {
         int mealExpenses = 0;
-        for (Expense expense: expenses){
-            if (expense.isMeal()) {
-                mealExpenses += expense.getAmount();
+
+        System.out.println("Expenses " + new Date());
+
+        for (Expense expense : expenses) {
+            if (expense.type == ExpenseType.DINNER || expense.type == ExpenseType.BREAKFAST) {
+                mealExpenses += expense.amount;
             }
+
+            String expenseName = "";
+            switch (expense.type) {
+                case DINNER:
+                    expenseName = "Dinner";
+                    break;
+                case BREAKFAST:
+                    expenseName = "Breakfast";
+                    break;
+                case CAR_RENTAL:
+                    expenseName = "Car Rental";
+                    break;
+            }
+
+            String mealOverExpensesMarker = expense.type == ExpenseType.DINNER && expense.amount > 5000 || expense.type == ExpenseType.BREAKFAST && expense.amount > 1000 ? "X" : " ";
+
+            System.out.println(expenseName + "\t" + expense.amount + "\t" + mealOverExpensesMarker);
+
+            total += expense.amount;
         }
-        return mealExpenses;
+
+        System.out.println("Meal expenses: " + mealExpenses);
+        System.out.println("Total expenses: " + total);
     }
-
-
-    private String getFooter(int mealExpenses, int total) {
-        return "Meal expenses: " + mealExpenses + "\n" + "Total expenses: " + total + "\n";
-    }
-
-    private String getHeader(Date date) {
-        return "Expenses " + date + "\n";
-    }
-
-
 }
